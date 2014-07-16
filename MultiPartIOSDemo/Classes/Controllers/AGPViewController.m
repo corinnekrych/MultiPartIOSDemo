@@ -38,15 +38,15 @@
     [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"user\"\r\n\r\n%d", 1] dataUsingEncoding:NSUTF8StringEncoding]];
     
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    //[request setHTTPBody:body];
-    
+   
     
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionUploadTask *uploadTask = [session uploadTaskWithRequest:request
                                                                fromData:body
                                                       completionHandler:
                                           ^(NSData *data, NSURLResponse *response, NSError *error) {
+                                              NSHTTPURLResponse* rep = (NSHTTPURLResponse*) response;
+                                              if (rep.statusCode == 200) NSLog(@"YOUPIIIII");
                                               NSLog(@"Uploading.....RESP::%@ ERROR::%@" , response, error);
                                           }];
     
