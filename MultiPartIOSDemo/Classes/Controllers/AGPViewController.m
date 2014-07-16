@@ -14,19 +14,37 @@
     
     NSURL *file1 = [[NSBundle mainBundle] URLForResource:@"jboss" withExtension:@"jpg"];
     NSString *stringPath = [file1 absoluteString];
-    NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:stringPath]];
-    NSURL *URL = [NSURL URLWithString:@"http://192.168.0.13:8080/aerogear-integration-tests-server/rest/upload"];
+    NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:stringPath]];
     
+    NSURL *URL = [NSURL URLWithString:@"http://192.168.0.13:8080/aerogear-integration-tests-server/rest/upload"];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
     [request setHTTPMethod: @"POST"];
-    [request setValue:@"image/jpeg" forHTTPHeaderField:@"Content-Type"];
-    //uint64_t bytesTotalForThisFile = [[[NSFileManager defaultManager] attributesOfItemAtPath:stringPath error:NULL] fileSize];
+    
+    NSString *boundary = @"YOUR_BOUNDARY_STRING";
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary];
+    [request addValue:contentType forHTTPHeaderField:@"Content-Type"];
 
-    //[request setValue:[NSString stringWithFormat:@"%llu", bytesTotalForThisFile] forHTTPHeaderField:@"Content-Length"];
+    NSMutableData *body = [NSMutableData data];
+    
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"photo\"; filename=\"%@.jpg\"\r\n", @"jboss"] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[NSData dataWithData:imageData]];
+    
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"message\"\r\n\r\n%@", @"some moooore test here"] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"user\"\r\n\r\n%d", 1] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    //[request setHTTPBody:body];
+    
     
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionUploadTask *uploadTask = [session uploadTaskWithRequest:request
-                                                               fromData:data
+                                                               fromData:body
                                                       completionHandler:
                                           ^(NSData *data, NSURLResponse *response, NSError *error) {
                                               NSLog(@"Uploading.....RESP::%@ ERROR::%@" , response, error);
