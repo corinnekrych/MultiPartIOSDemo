@@ -10,6 +10,32 @@
 @implementation AGPViewController 
 
 - (void)viewDidLoad {
+
+    
+    NSURL *file1 = [[NSBundle mainBundle] URLForResource:@"jboss" withExtension:@"jpg"];
+    NSString *stringPath = [file1 absoluteString];
+    NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:stringPath]];
+    NSURL *URL = [NSURL URLWithString:@"http://192.168.0.13:8080/aerogear-integration-tests-server/rest/upload"];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
+    [request setHTTPMethod: @"POST"];
+    [request setValue:@"image/jpeg" forHTTPHeaderField:@"Content-Type"];
+    //uint64_t bytesTotalForThisFile = [[[NSFileManager defaultManager] attributesOfItemAtPath:stringPath error:NULL] fileSize];
+
+    //[request setValue:[NSString stringWithFormat:@"%llu", bytesTotalForThisFile] forHTTPHeaderField:@"Content-Length"];
+    
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionUploadTask *uploadTask = [session uploadTaskWithRequest:request
+                                                               fromData:data
+                                                      completionHandler:
+                                          ^(NSData *data, NSURLResponse *response, NSError *error) {
+                                              NSLog(@"Uploading.....RESP::%@ ERROR::%@" , response, error);
+                                          }];
+    
+    [uploadTask resume];
+}
+/*
+- (void)viewDidLoad {
     [super viewDidLoad];
 
     // access the singleton instance that holds our pipes
@@ -56,7 +82,7 @@
         NSLog(@"An error has occured during upload! \n%@", error);
     }];
 }
-
+*/
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.

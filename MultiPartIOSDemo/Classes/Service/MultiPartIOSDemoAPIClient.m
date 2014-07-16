@@ -6,7 +6,7 @@
 
 #import "MultiPartIOSDemoAPIClient.h"
 
-static NSString * const kMultiPartIOSDemoAPIBaseURLString = @"http://localhost:8080/aerogear-integration-tests-server/rest";
+static NSString * const kMultiPartIOSDemoAPIBaseURLString = @"http://192.168.0.13:8080/aerogear-integration-tests-server/rest";
 
 @implementation MultiPartIOSDemoAPIClient
 
